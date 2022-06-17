@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
   "/post/create",
   requireSignin,
-  upload.single("postImg"),
+  upload.single("Img"),
   createPost
 );
 

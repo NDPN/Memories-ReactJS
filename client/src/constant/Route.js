@@ -1,44 +1,30 @@
 import { Layout } from "antd";
 import { Content, Footer, Header } from "antd/lib/layout/layout";
-import Login from "../page/login/Login";
-import Home from "../page/home/Home";
+import Login from "../page/Login";
+import Home from "../page/Home";
+import Profile from "../page/Profile";
 import User from "../component/user";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { HomeTwoTone, MessageTwoTone, ProfileTwoTone } from "@ant-design/icons";
-import Logout from "../component/Logout/logout";
 
 export const ROUTE_LAYOUT = [
   {
-    label: (
-      <>
-        <HomeTwoTone /> Home page
-      </>
-    ),
-    key: "Home",
+    key: "home",
+    label: <Link to={"/homepage"}>Homepage</Link>,
+    element: <Home />,
+    icon: <HomeTwoTone />,
   },
   {
-    label: (
-      <>
-        <MessageTwoTone /> Chatting
-      </>
-    ),
-    key: "Message",
+    key: "message",
+    label: <Link to={"/"}>Message</Link>,
+    // element: <Home />,
+    icon: <MessageTwoTone />,
   },
   {
-    label: (
-      <>
-        <ProfileTwoTone /> Your Profile
-      </>
-    ),
-    key: "Profile",
-  },
-  {
-    label: (
-      <>
-        <Logout />
-      </>
-    ),
-    key: "Logout",
+    key: "profile",
+    label: <Link to={"/profile"}>Profile</Link>,
+    element: <Profile />,
+    icon: <ProfileTwoTone />,
   },
 ];
 
@@ -54,6 +40,11 @@ export const ROUTE = (user) => [
             path: "homepage",
             name: "homepage",
             element: <Home />,
+          },
+          {
+            path: "profile",
+            name: "profile",
+            element: <Profile />,
           },
         ]
       ) : (

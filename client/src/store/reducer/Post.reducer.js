@@ -8,8 +8,6 @@ const updatePost = (array, newData, _id) => {
   let index = -1;
   const currentPost = array;
 
-  console.log(newData.id);
-
   index = array.findIndex((arr) => arr._id === _id);
 
   const afterUpd = [
@@ -30,8 +28,6 @@ const removeItem = (array, item) => {
     ...currentPost.slice(0, index),
     ...currentPost.slice(index + 1),
   ];
-
-  console.log(afterDel);
 
   return afterDel;
 };
@@ -65,7 +61,6 @@ export default function Post(state = initialState, action) {
       return { ...state, loading: true };
     case POST.UPDATE_POST_SUCCESS:
       let { post } = action.payload;
-      console.log(action.payload);
       return {
         ...state,
         loading: false,

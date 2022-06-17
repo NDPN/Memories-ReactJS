@@ -1,5 +1,6 @@
 const Post = require("../models/post");
 
+// Create post
 exports.createPost = (req, res) => {
   const postObj = {
     status: req.body.status,
@@ -21,6 +22,7 @@ exports.createPost = (req, res) => {
   });
 };
 
+// Get post base on user
 exports.getPost = (req, res) => {
   const userOwner = req.body.userid;
   Post.find({
@@ -36,6 +38,7 @@ exports.getPost = (req, res) => {
   });
 };
 
+// Update post
 exports.updatePost = async (req, res) => {
   const newPost = {
     status: req.body.status,
@@ -57,6 +60,7 @@ exports.updatePost = async (req, res) => {
   }
 };
 
+// Delete
 exports.deletePost = async (req, res) => {
   const post = await Post.findOneAndDelete({ _id: req.body.id });
 

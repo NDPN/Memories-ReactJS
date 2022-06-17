@@ -3,6 +3,7 @@ import { LoadingOutlined, CameraTwoTone } from "@ant-design/icons";
 import React, { useState } from "react";
 import { createPost } from "../../store/action/Post.action";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // convert img to base 64
 const getBase64 = (img, callback) => {
@@ -30,6 +31,8 @@ const beforeUpload = (file) => {
 function CreatePost() {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
+
+  const navigate = useNavigate();
 
   const handleChange = (info) => {
     if (info.file.status === "uploading") {
@@ -72,27 +75,26 @@ function CreatePost() {
 
   const userid = selector.Auth.user._id;
   const fullname = selector.Auth.user.fullName;
+  const avatar = selector.Auth.user.avatar;
 
   // Create Post
   const createPosts = (values) => {
     const form = {
       status: values.status,
-      urlImg: values.Img[0].response.image.url,
+      urlImg: values.Img[values.Img.length - 1].response.image.url,
       userid: userid,
       author: fullname,
     };
 
     dispatch(createPost(form));
+    navigate(0);
   };
 
   return (
     <>
       <Card>
         <Form onFinish={createPosts}>
-          <Form.Item
-            name="status"
-            label={<Avatar src="https://joeschmoe.io/api/v1/random" />}
-          >
+          <Form.Item name="status" label={<Avatar src={avatar} />}>
             <Input
               style={{ borderRadius: "10px" }}
               placeholder="What do you think?"
@@ -131,13 +133,7 @@ function CreatePost() {
             </Form.Item>
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              onClick={() => {
-                setImageUrl("");
-              }}
-            >
+            <Button type="primary" htmlType="submit">
               Post
             </Button>
           </Form.Item>

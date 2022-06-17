@@ -47,8 +47,16 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      default: "http://localhost:5000/uploads/o25O_1biV-default_avt.png",
     },
-    request: [{ type: mongoose.Types.ObjectId, ref: "Friend" }],
+    friend: {
+      type: [Array],
+    },
+    request: [
+      {
+        type: [Array],
+      },
+    ],
   },
   { timestamps: true }
 );

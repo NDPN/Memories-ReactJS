@@ -4,6 +4,34 @@ import axios from "../../config/Axiosconfig";
 import { message } from "antd";
 import { getCookie } from "../../config/getCookie/GetCookie";
 
+// Register
+export const registerAction = (form) => {
+  return async (dispatch) => {
+    dispatch({
+      type: AUTH.REGISTER_REQUEST,
+    });
+
+    return AuthLogin.signupService(form).then((res) => {
+      if (res.status === 200) {
+        const { email, password, token } = res.data.user;
+        dispatch({
+          type: AUTH.REGISTER_SUCCESS,
+          payload: {
+            user: { email, password },
+            token,
+            message: message.success("Đăng ký thành công"),
+          },
+        });
+      } else {
+        dispatch({
+          type: AUTH.REGISTER_FAIL,
+          message: message.error("Đăng ký không thành công"),
+        });
+      }
+    });
+  };
+};
+
 // Login
 export const loginAction = (form) => {
   return async (dispatch) => {
@@ -92,5 +120,29 @@ export const userLogout = () => {
         type: AUTH.LOGOUT_SUCCESS,
       });
     }
+  };
+};
+
+// Change avatar
+export const changeAvatar = (form) => {
+  return async (dispatch) => {
+    dispatch({
+      type: AUTH.CHANGE_AVATAR_REQUEST,
+    });
+    return AuthLogin.changeAvatar(form).then((res) => {
+      if (res.status === 200) {
+        const { avatar } = res.data;
+        dispatch({
+          type: AUTH.CHANGE_AVATAR_SUCCESS,
+          payload: {
+            avatar,
+          },
+        });
+      } else {
+        dispatch({
+          type: AUTH.CHANGE_AVATAR_FAIL,
+        });
+      }
+    });
   };
 };

@@ -76,18 +76,31 @@ exports.signIn = (req, res) => {
           process.env.JWT_SECRET,
           { expiresIn: process.env.JWT_Expired }
         );
-        const { _id, firstName, lastName, email, role, fullName, phoneNumber } =
-          user;
+        const {
+          _id,
+          firstName,
+          lastName,
+          fullName,
+          email,
+          role,
+          phoneNumber,
+          avatar,
+          friend,
+          request,
+        } = user;
         res.status(200).json({
           token,
           user: {
             _id,
             firstName,
             lastName,
+            fullName,
             email,
             role,
-            fullName,
             phoneNumber,
+            avatar,
+            friend,
+            request,
           },
         });
       } else {
@@ -97,6 +110,20 @@ exports.signIn = (req, res) => {
       return res.status(400).json({ message: "Have something wrong !!" });
     }
   });
+};
+
+// Change avatar
+exports.changeAvatar = async (req, res) => {
+  const newAvatar = {
+    avatar: req.body.urlImg,
+  };
+
+  const _id = req.body._id;
+  await User.findByIdAndUpdate({ _id }, newAvatar, {
+    new: true,
+  });
+
+  res.status(200).json(newAvatar);
 };
 
 // Sign out
@@ -127,28 +154,57 @@ exports.findUser = async (req, res) => {
   }
 };
 
-// Add friend
-exports.addFriend = async (req, res) => {
-  let user = req.body.user.split(",");
-  let listFriendId = req.body.listFriendId();
+// Send friend request
+exports.sendFriendReq = async (req, res) => {
+  let friendEmail = req.body.friendEmail;
+  let emailSendReq = req.body.emailSendReq.split();
   let allUser = [];
-  checkUser(user)
+  checkUser(emailSendReq)
     .then((res) => res.map((item) => (item[0] ? allUser.push(item[0]) : "")))
     .finally(() => {
       if (allUser.length > 0) {
         let newPromise = allUser.map((item) => {
-          return (
-            user.findOneAndUpdate(
-              {
-                _id: item._id,
-                request: { $ne: listFriendId },
-              },
-              { $push: { request: [listFriendId] } }
-            ),
+          const fullName = item.lastName + " " + item.firstName;
+          return User.findOneAndUpdate(
+            {
+              email: friendEmail,
+            },
+            { $push: { request: [item._id, fullName, item.avatar] } },
             { new: true }
           );
         });
-        console.log(newPromise);
+        Promise.all(newPromise)
+          .then((res) => res)
+          .finally(() => {
+            res
+              .status(200)
+              .json({ message: "You have send a add friend request" });
+          });
+      } else {
+        res.status(400).json({ message: "User not found" });
+      }
+    });
+};
+
+// Accept add friend request
+exports.acceptRequest = async (req, res) => {
+  const { id } = req.params;
+  const userAcceptId = req.body.userAcceptId;
+  await User.findOne({ _id: id })
+    .select("lastName firstName avatar")
+    .exec()
+    .then((user) => {
+      if (user) {
+        User.updateOne(
+          { _id: userAcceptId },
+          { $push: { friend: [user] }, $pull: { request: [user._id] } },
+          { new: true }
+        );
+        return res.status(200).json({ message: "Successfully" });
+      }
+
+      if (error) {
+        return res.status(400).json(error);
       }
     });
 };
@@ -157,7 +213,7 @@ exports.addFriend = async (req, res) => {
 checkUser = async (users) => {
   let promise = users.map((email) => {
     return User.find({ email: email.substring(1, email.length) })
-      .select("_id role userName")
+      .select("lastName firstName avatar")
       .exec()
       .then((user) => user);
   });

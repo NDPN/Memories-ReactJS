@@ -6,7 +6,9 @@ const {
   signOut,
   authenticate,
   findUser,
-  addFriend,
+  changeAvatar,
+  sendFriendReq,
+  acceptRequest,
 } = require("../controller/auth.js");
 
 const router = express.Router();
@@ -20,13 +22,18 @@ router.post("/signin", upload.none(), signIn);
 // SignOut
 router.post("/signout", upload.none(), signOut);
 
-// uthenticate
+// Authenticate
 router.post("/auth", requireSignin, authenticate);
+
+// Update user
+router.post("/changeAvatar", requireSignin, upload.single("Img"), changeAvatar);
 
 // Find user
 router.post("/user", requireSignin, upload.none(), findUser);
 
-// Add friend a user
-router.post("/addfr", requireSignin, upload.none(), addFriend);
+// Send friend request
+router.post("/addfriend", requireSignin, upload.none(), sendFriendReq);
 
+// Accept add friend request
+router.post("/acceptfriend/:id", requireSignin, upload.none(), acceptRequest)
 module.exports = router;

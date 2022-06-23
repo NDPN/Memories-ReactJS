@@ -50,8 +50,9 @@ const userSchema = new mongoose.Schema(
       default: "http://localhost:5000/uploads/o25O_1biV-default_avt.png",
     },
     friend: {
-      type: [Array],
+      type: Array,
     },
+
     request: [
       {
         type: [Array],

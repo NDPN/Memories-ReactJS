@@ -4,7 +4,7 @@ const api_path = {
   getPost: "post/getPosts",
   createPost: "post/create",
   deletePost: "post/delete",
-  updatePost: "/post/update",
+  updatePost: "post/update",
 };
 
 const Post = {

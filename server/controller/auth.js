@@ -135,23 +135,75 @@ exports.signOut = (req, res) => {
 };
 
 // Authenticate
-exports.authenticate = (req, res) => {
-  res.status(200).json({
-    authenticate: true,
+exports.authenticate = async (req, res) => {
+  const userId = req.body.userId;
+  const status = req.body.status;
+
+  await User.findOne({ _id: userId }).exec(async (error, user) => {
+    if (user) {
+      if (status === true) {
+        const {
+          _id,
+          firstName,
+          lastName,
+          fullName,
+          email,
+          role,
+          phoneNumber,
+          avatar,
+          friend,
+          request,
+        } = user;
+        res.status(200).json({
+          user: {
+            _id,
+            firstName,
+            lastName,
+            fullName,
+            email,
+            role,
+            phoneNumber,
+            avatar,
+            friend,
+            request,
+          },
+        });
+      } else {
+        res.status(400).json({ message: "You need to login" });
+      }
+    }
+    if (error) {
+      res.status(400).json({ message: "You need to login" });
+    }
   });
 };
 
-// Find user
+// Find user by name
 exports.findUser = async (req, res) => {
   const name = RegExp(req.body.name, "i");
   const user = await User.find({
     $or: [{ firstName: name }, { lastName: name }, { email: name }],
   })
-    .select("_id firstName lastName userName email role")
+    .select("firstName lastName email phoneNumber")
     .exec();
   if (user) {
     return res.status(200).json({ user });
   }
+};
+
+// find user by Id
+exports.findUserById = async (req, res) => {
+  const userId = req.body.userId;
+  await User.findById(userId)
+    .select("firstName lastName email phoneNumber avatar")
+    .exec()
+    .then((user) => {
+      if (user) {
+        res.status(200).json({ userInfo: user });
+      } else {
+        res.status(400).json({ message: "User not found .-." });
+      }
+    });
 };
 
 // Send friend request
@@ -188,25 +240,13 @@ exports.sendFriendReq = async (req, res) => {
 
 // Accept add friend request
 exports.acceptRequest = async (req, res) => {
-  const { id } = req.params;
+  const userRequestId = req.body.userRequestId;
   const userAcceptId = req.body.userAcceptId;
-  await User.findOne({ _id: id })
-    .select("lastName firstName avatar")
-    .exec()
-    .then((user) => {
-      if (user) {
-        User.updateOne(
-          { _id: userAcceptId },
-          { $push: { friend: [user] }, $pull: { request: [user._id] } },
-          { new: true }
-        );
-        return res.status(200).json({ message: "Successfully" });
-      }
+  addFriendtoList(userRequestId, userAcceptId);
+  addFriendtoList(userAcceptId, userRequestId);
+  delReq(userRequestId, userAcceptId);
 
-      if (error) {
-        return res.status(400).json(error);
-      }
-    });
+  return res.status(200).json({ message: "You have accept a friend request" });
 };
 
 // Check user func
@@ -219,4 +259,43 @@ checkUser = async (users) => {
   });
 
   return Promise.all(promise);
+};
+
+// Add info user to friend list
+const addFriendtoList = async (id, userAcceptId) => {
+  const request = await User.find({ _id: id })
+    .select("lastName firstName avatar")
+    .exec()
+    .then((user) => {
+      if (user) {
+        const promise = user.map((item) => {
+          return User.findOneAndUpdate(
+            { _id: userAcceptId },
+            { $push: { friend: item } },
+            { new: true }
+          );
+        });
+        return Promise.all(promise);
+      }
+    });
+};
+
+// Delete Request
+const delReq = async (id, userAcceptId) => {
+  const del = await User.find({ _id: id })
+    .select("lastName firstName avatar")
+    .exec()
+    .then((user) => {
+      if (user) {
+        const promise = user.map((item) => {
+          const fullName = item.lastName + " " + item.firstName;
+          return User.updateOne(
+            { _id: userAcceptId },
+            { $pull: { request: [item._id, fullName, item.avatar] } },
+            { new: true }
+          );
+        });
+        Promise.all(promise).then((res) => console.log(res));
+      }
+    });
 };

@@ -12,20 +12,32 @@ import {
 } from "antd";
 import { Content, Footer, Header } from "antd/lib/layout/layout";
 import { DownOutlined, NotificationOutlined } from "@ant-design/icons";
-import React, { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import React from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import WithAuth from "../HOC/WithAuth";
 import { ROUTE_LAYOUT } from "../../constant/Route";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { option, notification } from "../Menu-Dropdown";
 import Meta from "antd/lib/card/Meta";
+import { acceptFriendReq } from "../../store/action/Friend.action";
 
 function User() {
   const selector = useSelector((root) => root);
+  const location = useLocation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const loginUser = selector.Auth.user;
+
   const request = selector.Auth.user.request;
+
+  const acceptFriendRequest = (id1, id2) => {
+    const id = {
+      userAcceptId: id1,
+      userRequestId: id2,
+    };
+    dispatch(acceptFriendReq(id)).then(() => navigate(0));
+  };
 
   const notificationRequest = (arr) => {
     let noti = null;
@@ -46,7 +58,16 @@ function User() {
                 style={{
                   width: 300,
                 }}
-                actions={[<div>Accept</div>, <div>Decline</div>]}
+                actions={[
+                  <div
+                    onClick={() =>
+                      acceptFriendRequest(loginUser._id, item[0].toString())
+                    }
+                  >
+                    Accept
+                  </div>,
+                  <div>Decline</div>,
+                ]}
               >
                 <Meta
                   avatar={<Avatar src={item[2].toString()} />}
@@ -65,14 +86,6 @@ function User() {
 
     return noti;
   };
-
-  useEffect(() => {
-    if (loginUser === "") {
-      return navigate("/login");
-    } else {
-      navigate("/homepage");
-    }
-  }, []);
 
   return (
     <Layout>
@@ -96,8 +109,8 @@ function User() {
             <Menu
               theme="dark"
               mode="horizontal"
-              defaultSelectedKeys={"home"}
-              items={ROUTE_LAYOUT}
+              defaultSelectedKeys={location.pathname.split("/")[1]}
+              items={ROUTE_LAYOUT(loginUser._id)}
             />
           </Col>
           <Col span={3}>

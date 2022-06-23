@@ -87,7 +87,6 @@ function CreatePost() {
     };
 
     dispatch(createPost(form));
-    navigate(0);
   };
 
   return (

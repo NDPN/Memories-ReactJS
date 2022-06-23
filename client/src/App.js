@@ -1,6 +1,6 @@
 import { Spin } from "antd";
 import { useSelector } from "react-redux";
-import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
+import { BrowserRouter, useRoutes } from "react-router-dom";
 import useAuth from "./config/customHook/useAuth";
 import { ROUTE } from "./constant/Route";
 import "antd/dist/antd.min.css";

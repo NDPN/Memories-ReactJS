@@ -1,13 +1,20 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, useNavigate } from "react-router-dom";
 import { AuthAction } from "../../store/action";
+import { getCookie } from "../getCookie/GetCookie";
 
 function useAuth() {
   const dispatch = useDispatch();
   const authReducer = useSelector((root) => root.Auth);
+
   useEffect(() => {
-    dispatch(AuthAction.IsUserLogin());
+    const id = JSON.parse(getCookie("user"))._id;
+
+    const auth = {
+      userId: id,
+      status: authReducer.status,
+    };
+    dispatch(AuthAction.IsUserLogin(auth));
   }, []);
 
   return authReducer;

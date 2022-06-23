@@ -7,9 +7,9 @@ import User from "../component/user";
 import { Link, Navigate } from "react-router-dom";
 import { HomeTwoTone, MessageTwoTone, ProfileTwoTone } from "@ant-design/icons";
 
-export const ROUTE_LAYOUT = [
+export const ROUTE_LAYOUT = (userId) => [
   {
-    key: "home",
+    key: "homepage",
     label: <Link to={"/homepage"}>Homepage</Link>,
     element: <Home />,
     icon: <HomeTwoTone />,
@@ -22,7 +22,7 @@ export const ROUTE_LAYOUT = [
   },
   {
     key: "profile",
-    label: <Link to={"/profile"}>Profile</Link>,
+    label: <Link to={"/profile/" + userId}>Profile</Link>,
     element: <Profile />,
     icon: <ProfileTwoTone />,
   },
@@ -32,9 +32,9 @@ export const ROUTE = (user) => [
   {
     title: "Home",
     path: "/",
-    element: <User user={user} status={user.status} />,
+    element: <User user={user} />,
     children:
-      user !== "" && user.status === true ? (
+      user !== "" ? (
         [
           {
             path: "homepage",
@@ -44,7 +44,7 @@ export const ROUTE = (user) => [
           {
             path: "profile",
             name: "profile",
-            element: <Profile />,
+            children: [{ path: ":id", name: ":id", element: <Profile /> }],
           },
         ]
       ) : (

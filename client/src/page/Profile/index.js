@@ -13,10 +13,14 @@ import {
   CameraFilled,
   PictureOutlined,
   LoadingOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeAvatar } from "../../store/action/Auth.action";
+import { findUserById } from "../../store/action/User.action";
+import { sendFriendReq } from "../../store/action/Friend.action";
+import { useNavigate, useParams } from "react-router-dom";
 
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
@@ -73,16 +77,22 @@ function Profile() {
 
   const selector = useSelector((root) => root);
   const user = selector.Auth.user;
+  const dataUser = selector.User.data;
   const [changeAvatarModal, setChangeAvatarModal] = useState(false);
 
   const showModal = () => {
     setChangeAvatarModal(true);
   };
 
+  //
   const dispatch = useDispatch();
+  const params = useParams();
+  const navigate = useNavigate();
 
   const handleOk = () => {
-    dispatch(changeAvatar({ _id: user._id, urlImg: imageUrl }));
+    dispatch(changeAvatar({ _id: user._id, urlImg: imageUrl })).then(() => {
+      navigate(0);
+    });
     setChangeAvatarModal(false);
   };
 
@@ -90,11 +100,25 @@ function Profile() {
     setChangeAvatarModal(false);
   };
 
+  const sendFriendRequest = (email1, email2) => {
+    const email = {
+      emailSendReq: "@" + email1,
+      friendEmail: email2,
+    };
+    dispatch(sendFriendReq(email));
+  };
+
   // Render user's info
   const Info = (obj) => {
     let xhtml = null;
     xhtml = Object.keys(obj).map((key, index) => {
-      if (key !== "_id" && key !== "role" && key !== "avatar") {
+      if (
+        key !== "_id" &&
+        key !== "role" &&
+        key !== "avatar" &&
+        key !== "friend" &&
+        key !== "request"
+      ) {
         return (
           <>
             <Descriptions.Item label={key}>
@@ -106,6 +130,10 @@ function Profile() {
     });
     return xhtml;
   };
+
+  useEffect(() => {
+    dispatch(findUserById({ userId: params.id }));
+  }, []);
 
   return (
     <>
@@ -154,7 +182,7 @@ function Profile() {
           style={{ display: "flex", justifyContent: "center" }}
         >
           <div>
-            <Avatar size={150} src={user.avatar} />
+            <Avatar size={150} src={dataUser.avatar} />
             <div
               style={{
                 marginTop: "10px",
@@ -162,14 +190,26 @@ function Profile() {
                 justifyContent: "space-around",
               }}
             >
-              <Button
-                type="primary"
-                style={{ borderRadius: "10px" }}
-                icon={<CameraFilled />}
-                onClick={() => showModal()}
-              >
-                Change Avatar
-              </Button>
+              {params.id === user._id ? (
+                <Button
+                  type="primary"
+                  style={{ borderRadius: "10px" }}
+                  icon={<CameraFilled />}
+                  onClick={() => showModal()}
+                >
+                  Change Avatar
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  style={{ borderRadius: "10px" }}
+                  icon={<SmileOutlined />}
+                  // loading={loadings[0]}
+                  onClick={() => sendFriendRequest(user.email, dataUser.email)}
+                >
+                  Add friend
+                </Button>
+              )}
             </div>
           </div>
         </Col>
@@ -178,13 +218,14 @@ function Profile() {
         <Divider orientation="center" orientationMargin="0">
           Information
         </Divider>
-        <Descriptions>{Info(user)}</Descriptions>
+        <Descriptions>{Info(dataUser)}</Descriptions>
       </Row>
       <Row>
         <Divider orientation="center" orientationMargin="0">
           Your Album
         </Divider>
       </Row>
+      {/* <Button onClick={() => test()}>test find user</Button> */}
     </>
   );
 }

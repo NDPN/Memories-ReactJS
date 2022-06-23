@@ -67,37 +67,34 @@ export const loginAction = (form) => {
 };
 
 // Authenticate
-export const IsUserLogin = () => {
+export const IsUserLogin = (info) => {
   return async (dispatch) => {
-    dispatch({
-      type: AUTH.LOGIN_REQUEST,
-    });
-
     const token = getCookie("token") !== null ? getCookie("token") : "";
 
     if (token) {
-      const res = await axios.post("/auth");
-      if (res.status === 200) {
-        const user = JSON.parse(getCookie("user"));
-        dispatch({
-          type: AUTH.LOGIN_SUCCESS,
-          payload: {
-            token,
-            user,
-          },
-        });
-        return true;
-      } else {
-        dispatch({
-          type: AUTH.LOGIN_FAIL,
-          payload: {
-            message: "something wrong!!",
-          },
-        });
-      }
+      return AuthLogin.authService(info).then((res) => {
+        if (res.status === 200) {
+          const { user } = res.data;
+          document.cookie = "user=" + JSON.stringify(user);
+          dispatch({
+            type: AUTH.ISUSERLOGIN_SUCCESS,
+            payload: {
+              token,
+              user,
+            },
+          });
+        } else {
+          dispatch({
+            type: AUTH.ISUSERLOGIN_FAIL,
+            payload: {
+              message: "Something wrong !!",
+            },
+          });
+        }
+      });
     } else {
       dispatch({
-        type: AUTH.LOGIN_FAIL,
+        type: AUTH.ISUSERLOGIN_FAIL,
         payload: {
           message: "something wrong!!",
         },

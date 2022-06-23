@@ -20,7 +20,7 @@ export default function Auth(state = initialState, action) {
     case AUTH.REGISTER_FAIL:
       return { ...state, status: false, authenticating: false };
     case AUTH.LOGIN_REQUEST:
-      return { ...state, status: false, authenticating: true };
+      return { ...state, status: true, authenticating: true };
     case AUTH.LOGIN_SUCCESS:
       return {
         user: action.payload.user,
@@ -30,6 +30,15 @@ export default function Auth(state = initialState, action) {
       };
     case AUTH.LOGIN_FAIL:
       return { ...state, status: false, authenticating: false };
+    case AUTH.ISUSERLOGIN_SUCCESS:
+      return {
+        user: action.payload.user,
+        token: action.payload.token,
+        status: true,
+        authenticating: false,
+      };
+    case AUTH.ISUSERLOGIN_FAIL:
+      return { ...state, status: false, authenticating: false };
     case AUTH.LOGOUT_REQUEST:
       return { ...state, status: false, authenticating: true };
     case AUTH.LOGOUT_SUCCESS:
@@ -38,7 +47,6 @@ export default function Auth(state = initialState, action) {
       return { ...state, status: true, authenticating: false };
     case AUTH.CHANGE_AVATAR_SUCCESS:
       let { avatar } = action.payload;
-      console.log(action.payload);
       return {
         ...state,
         authenticating: false,

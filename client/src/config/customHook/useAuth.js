@@ -8,7 +8,7 @@ function useAuth() {
   const authReducer = useSelector((root) => root.Auth);
 
   useEffect(() => {
-    const id = JSON.parse(getCookie("user"))._id;
+    const id = getCookie("user") ? JSON.parse(getCookie("user"))._id : null;
 
     const auth = {
       userId: id,

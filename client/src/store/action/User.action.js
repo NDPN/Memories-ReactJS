@@ -27,3 +27,24 @@ export const findUserById = (userid) => {
     });
   };
 };
+
+export const findUserByName = (username) => {
+  return async (dispatch) => {
+    dispatch({
+      type: USER.FINDNAMEUSER_REQUEST,
+    });
+    return User.findUserByName(username).then((res) => {
+      if (res.status === 200) {
+        const { user } = res.data;
+        dispatch({
+          type: USER.FINDNAMEUSER_SUCCESS,
+          payload: user,
+        });
+      } else {
+        dispatch({
+          type: USER.USER_FAIL,
+        });
+      }
+    });
+  };
+};

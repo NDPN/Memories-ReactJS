@@ -4,11 +4,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const env = require("dotenv");
 const path = require("path");
+const socket = require("socket.io");
 
 // Route
 const authRoute = require("./router/auth");
 const Post = require("./router/post");
 const Img = require("./router/img");
+const Message = require("./router/message");
 
 const app = express();
 // Setup environment
@@ -25,6 +27,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/api", authRoute);
 app.use("/api", Post);
 app.use("/api", Img);
+app.use("/api", Message);
 
 // Header
 app.use((req, res, next) => {
@@ -33,12 +36,38 @@ app.use((req, res, next) => {
 });
 
 // Setup db
+const server = app.listen(process.env.PORT);
+
 mongoose
   .connect(URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Connected to db");
-    app.listen(process.env.PORT, () => {
-      console.log(`server is running on ${process.env.PORT}`);
-    });
+    server;
   })
   .catch((err) => console.log("err", err));
+
+// Setup socket io
+const io = socket(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    credentials: true,
+  },
+});
+
+global.onlineUsers = new Map();
+
+io.on("connection", (socket) => {
+  global.chatSocket = socket;
+  socket.on("add-user", (userId) => {
+    onlineUsers.set(userId, socket.id);
+  });
+
+  socket.on("send-msg", (data) => {
+    if (data.to !== "") {
+      socket
+        .to(onlineUsers.get(data.users[1]))
+        .emit("msg-receive", data.users);
+    }
+  });
+});
+

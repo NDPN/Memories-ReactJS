@@ -1,0 +1,57 @@
+.message {
+    overflow: auto;
+    height: 75vh;
+
+    &::-webkit-scrollbar-thumb {
+        background: rgb(73, 69, 69);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar:hover {
+        color: red
+    }
+
+    .sender {
+        display: flex;
+        justify-content: flex-end;
+
+        .content {
+            min-width: 1%;
+            max-width: 25%;
+
+            overflow-wrap: break-word;
+            background-color: #91d5ff;
+            border-radius: 10px;
+
+            margin: 4px;
+            padding: 5px;
+        }
+    }
+
+    .receive {
+        display: flex;
+        justify-content: flex-start;
+
+        .content {
+            min-width: 5%;
+            max-width: 25%;
+
+            overflow-wrap: break-word;
+            background-color: #adc6ff;
+            border-radius: 10px;
+
+            margin: 4px;
+            padding: 5px;
+        }
+    }
+}
+
+.notice {
+    display: flex;
+    justify-content: center;
+    font-size: large;
+}

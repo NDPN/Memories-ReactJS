@@ -184,7 +184,7 @@ exports.findUser = async (req, res) => {
   const user = await User.find({
     $or: [{ firstName: name }, { lastName: name }, { email: name }],
   })
-    .select("firstName lastName email phoneNumber")
+    .select("firstName lastName email avatar")
     .exec();
   if (user) {
     return res.status(200).json({ user });
@@ -204,6 +204,22 @@ exports.findUserById = async (req, res) => {
         res.status(400).json({ message: "User not found .-." });
       }
     });
+};
+
+// get friend by Id
+exports.getFriend = async (req, res) => {
+  const idFriendList = req.body;
+  const friends = await User.find({
+    _id: { $in: idFriendList },
+  })
+    .select(" firstName lastName avatar")
+    .exec();
+
+  if (friends) {
+    return res.status(200).json({ friendList: friends });
+  } else {
+    return res.status(400).json("Have something wrong !!");
+  }
 };
 
 // Send friend request
@@ -249,11 +265,22 @@ exports.acceptRequest = async (req, res) => {
   return res.status(200).json({ message: "You have accept a friend request" });
 };
 
+// Unfriend
+exports.unFriend = async (req, res) => {
+  const userRemoveRequest = req.body.userRemoveRequest;
+  const userRemovedId = req.body.userRemovedId;
+
+  removeFriendFromList(userRemoveRequest, userRemovedId);
+  removeFriendFromList(userRemovedId, userRemoveRequest);
+
+  res.status(200).json("user is being removed");
+};
+
 // Check user func
 checkUser = async (users) => {
   let promise = users.map((email) => {
     return User.find({ email: email.substring(1, email.length) })
-      .select("lastName firstName avatar")
+      .select("avatar firstName lastName")
       .exec()
       .then((user) => user);
   });
@@ -261,10 +288,10 @@ checkUser = async (users) => {
   return Promise.all(promise);
 };
 
-// Add info user to friend list
+// Add id user to friend list
 const addFriendtoList = async (id, userAcceptId) => {
   const request = await User.find({ _id: id })
-    .select("lastName firstName avatar")
+    .select("_id")
     .exec()
     .then((user) => {
       if (user) {
@@ -272,6 +299,24 @@ const addFriendtoList = async (id, userAcceptId) => {
           return User.findOneAndUpdate(
             { _id: userAcceptId },
             { $push: { friend: item } },
+            { new: true }
+          );
+        });
+        return Promise.all(promise);
+      }
+    });
+};
+// Remove id user from friend list
+const removeFriendFromList = async (id, userRemovedId) => {
+  const request = await User.find({ _id: id })
+    .select("_id")
+    .exec()
+    .then((user) => {
+      if (user) {
+        const promise = user.map((item) => {
+          return User.findOneAndUpdate(
+            { _id: userRemovedId },
+            { $pull: { friend: item } },
             { new: true }
           );
         });

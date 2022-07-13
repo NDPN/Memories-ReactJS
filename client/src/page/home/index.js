@@ -1,11 +1,13 @@
-import { Avatar, Card, Col, Row, Image } from "antd";
+import { Avatar, Card, Col, Row, Image, List } from "antd";
 import Meta from "antd/lib/card/Meta";
 import React, { useEffect, useState } from "react";
 import { LikeTwoTone, DeleteTwoTone, EditTwoTone } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { deletePost, getPost } from "../../store/action/Post.action";
-import CreatePost from "../../component/CreatePost/Create Post";
-import UpdatePosts from "../../component/UpdatePost/Update Post";
+import CreatePost from "../../component/CreatePost";
+import UpdatePosts from "../../component/UpdatePost";
+import { getFriendList } from "../../store/action/Friend.action";
+import styles from "./styles.module.scss";
 
 function Home() {
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -30,21 +32,27 @@ function Home() {
   const avatar = selector.Auth.user.avatar;
   const post = selector.Post.data;
   const load = selector.Post.loading;
+  const friendList = selector.Friend.friendList;
 
   // Render post
   const renderPost = (arr) => {
     let xhtml = null;
 
     xhtml = arr.map((item) => (
-      <div key={item._id}>
+      <div key={item._id} style={{ marginTop: "5%" }}>
         <Card
-          style={{
-            marginTop: "20px",
-            width: 320,
-            margin: "15px",
-          }}
+          style={{ borderRadius: "20px", border: "3px solid #bfbfbf" }}
           cover={
-            item.img ? <Image height={300} alt="img" src={item.img} /> : null
+            item.img ? (
+              <div className={styles.imgContainer}>
+                <Image
+                  width={"70%"}
+                  className={styles.imgCard}
+                  alt="img"
+                  src={item.img}
+                />
+              </div>
+            ) : null
           }
           actions={[
             <>
@@ -81,10 +89,34 @@ function Home() {
     return xhtml;
   };
 
+  // Render friends
+  const renderFriend = (arr) => {
+    let xhtml = "You dont have friend yet";
+    if (arr?.length > 0) {
+      xhtml = (
+        <List
+          itemLayout="horizontal"
+          dataSource={arr}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<Avatar size="small" src={item.avatar} />}
+                title={item.firstName + " " + item.lastName}
+              />
+            </List.Item>
+          )}
+        />
+      );
+    }
+
+    return xhtml;
+  };
+
   useEffect(() => {
     const userid = selector.Auth.user._id;
     if (selector.Auth.token && selector.Auth.status === true) {
       dispatch(getPost(userid));
+      dispatch(getFriendList(selector.Auth.user.friend));
     }
   }, []);
 
@@ -101,14 +133,7 @@ function Home() {
         <Col className="gutter-row" span={18}>
           <CreatePost />
 
-          <Row
-            gutter={{
-              xs: 8,
-              sm: 18,
-              md: 24,
-              lg: 32,
-            }}
-          >
+          <div className={styles.postRow}>
             {renderPost(post)}
             <UpdatePosts
               visible={openUpdateModal}
@@ -116,10 +141,10 @@ function Home() {
               handleCancel={handleCancel}
               item={item}
             />
-          </Row>
+          </div>
         </Col>
         <Col className="gutter-row" span={6}>
-          <div>col-6</div>
+          {renderFriend(friendList)}
         </Col>
       </Row>
     </>

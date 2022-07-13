@@ -1,0 +1,28 @@
+.welImg {
+    position: absolute;
+
+    transform: translate(10%, 15vh);
+
+    left: 25%;
+    right: 25%;
+
+    bottom: 25%;
+    top: 25%;
+
+    img {
+        width: 80%;
+        height: auto;
+
+        min-width: 50%;
+    }
+
+    .title {
+        padding: 20px;
+        width: 80%;
+        height: auto;
+
+        text-align: center;
+        font-size: 20px;
+        color: #40a9ff;
+    }
+}

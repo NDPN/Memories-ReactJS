@@ -14,12 +14,13 @@ import {
   PictureOutlined,
   LoadingOutlined,
   SmileOutlined,
+  UserDeleteOutlined,
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeAvatar } from "../../store/action/Auth.action";
 import { findUserById } from "../../store/action/User.action";
-import { sendFriendReq } from "../../store/action/Friend.action";
+import { sendFriendReq, unFriend } from "../../store/action/Friend.action";
 import { useNavigate, useParams } from "react-router-dom";
 
 const getBase64 = (img, callback) => {
@@ -77,7 +78,7 @@ function Profile() {
 
   const selector = useSelector((root) => root);
   const user = selector.Auth.user;
-  const dataUser = selector.User.data;
+  const dataUser = selector.User.userData;
   const [changeAvatarModal, setChangeAvatarModal] = useState(false);
 
   const showModal = () => {
@@ -111,25 +112,60 @@ function Profile() {
   // Render user's info
   const Info = (obj) => {
     let xhtml = null;
-    xhtml = Object.keys(obj).map((key, index) => {
-      if (
-        key !== "_id" &&
-        key !== "role" &&
-        key !== "avatar" &&
-        key !== "friend" &&
-        key !== "request"
-      ) {
-        return (
-          <>
-            <Descriptions.Item label={key}>
-              {Object.values(obj)[index]}
-            </Descriptions.Item>
-          </>
-        );
-      }
-    });
+    const { firstName, lastName, email, phoneNumber } = obj;
+
+    xhtml = (
+      <>
+        <Descriptions.Item label="First name">{firstName}</Descriptions.Item>
+        <Descriptions.Item label="Last name">{lastName}</Descriptions.Item>
+        <Descriptions.Item label="Email">{email}</Descriptions.Item>
+        <Descriptions.Item label="Phone number">
+          {phoneNumber}
+        </Descriptions.Item>
+      </>
+    );
+
     return xhtml;
   };
+
+  const checkUserIdFriend = () => {
+    const friend = user.friend;
+    const checking = friend.find((item) =>
+      item._id === params.id ? true : false
+    );
+    if (checking) {
+      return (
+        <Button
+          type="primary"
+          style={{ borderRadius: "10px" }}
+          icon={<UserDeleteOutlined />}
+          onClick={() =>
+            dispatch(
+              unFriend({
+                userRemoveRequest: user._id,
+                userRemovedId: dataUser._id,
+              })
+            )
+          }
+        >
+          Unfriend
+        </Button>
+      );
+    } else {
+      return (
+        <Button
+          type="primary"
+          style={{ borderRadius: "10px" }}
+          icon={<SmileOutlined />}
+          onClick={() => sendFriendRequest(user.email, dataUser.email)}
+        >
+          Add friend
+        </Button>
+      );
+    }
+  };
+
+  checkUserIdFriend();
 
   useEffect(() => {
     dispatch(findUserById({ userId: params.id }));
@@ -200,15 +236,7 @@ function Profile() {
                   Change Avatar
                 </Button>
               ) : (
-                <Button
-                  type="primary"
-                  style={{ borderRadius: "10px" }}
-                  icon={<SmileOutlined />}
-                  // loading={loadings[0]}
-                  onClick={() => sendFriendRequest(user.email, dataUser.email)}
-                >
-                  Add friend
-                </Button>
+                checkUserIdFriend()
               )}
             </div>
           </div>
@@ -225,7 +253,6 @@ function Profile() {
           Your Album
         </Divider>
       </Row>
-      {/* <Button onClick={() => test()}>test find user</Button> */}
     </>
   );
 }

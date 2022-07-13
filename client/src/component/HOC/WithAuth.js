@@ -8,7 +8,7 @@ export default function WithAuth(Component, user) {
     }
 
     if (props.user.user !== "") {
-      return <Component />;
+      return <Component {...props} />;
     }
   };
 }

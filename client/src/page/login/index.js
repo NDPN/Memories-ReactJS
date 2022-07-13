@@ -28,7 +28,7 @@ function Login() {
   const Login = (values) => {
     dispatch(loginAction(values)).then((res) => {
       if (res === true) {
-        return navigate("/homepage");
+        return navigate("/");
       }
     });
   };

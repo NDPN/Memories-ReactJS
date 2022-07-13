@@ -1,10 +1,6 @@
 import { Menu, Switch } from "antd";
 import Logout from "../Logout/logout";
-import {
-  DownOutlined,
-  LeftCircleTwoTone,
-  NotificationOutlined,
-} from "@ant-design/icons";
+import { LeftCircleTwoTone } from "@ant-design/icons";
 
 export const option = (
   <Menu

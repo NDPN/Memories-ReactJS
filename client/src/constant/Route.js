@@ -3,7 +3,10 @@ import { Content, Footer, Header } from "antd/lib/layout/layout";
 import Login from "../page/Login";
 import Home from "../page/Home";
 import Profile from "../page/Profile";
+import FindUser from "../page/FindUser";
+import Message from "../page/Message";
 import User from "../component/user";
+import MessageContainer from "../component/Message-container";
 import { Link, Navigate } from "react-router-dom";
 import { HomeTwoTone, MessageTwoTone, ProfileTwoTone } from "@ant-design/icons";
 
@@ -16,8 +19,8 @@ export const ROUTE_LAYOUT = (userId) => [
   },
   {
     key: "message",
-    label: <Link to={"/"}>Message</Link>,
-    // element: <Home />,
+    label: <Link to={"/message"}>Message</Link>,
+    element: <Message />,
     icon: <MessageTwoTone />,
   },
   {
@@ -28,13 +31,43 @@ export const ROUTE_LAYOUT = (userId) => [
   },
 ];
 
-export const ROUTE = (user) => [
+export const ROUTE_LAYOUT_LG = (userId) => [
+  {
+    key: "homepage",
+    label: (
+      <Link to={"/homepage"}>
+        <HomeTwoTone />
+      </Link>
+    ),
+    element: <Home />,
+  },
+  {
+    key: "message",
+    label: (
+      <Link to={"/message"}>
+        <MessageTwoTone />
+      </Link>
+    ),
+    element: <Message />,
+  },
+  {
+    key: "profile",
+    label: (
+      <Link to={"/profile/" + userId}>
+        <ProfileTwoTone />
+      </Link>
+    ),
+    element: <Profile />,
+  },
+];
+
+export const ROUTE = (props) => [
   {
     title: "Home",
     path: "/",
-    element: <User user={user} />,
+    element: <User user={props.auth} socket={props.socket} />,
     children:
-      user !== "" ? (
+      props.auth !== "" ? (
         [
           {
             path: "homepage",
@@ -45,6 +78,29 @@ export const ROUTE = (user) => [
             path: "profile",
             name: "profile",
             children: [{ path: ":id", name: ":id", element: <Profile /> }],
+          },
+          {
+            path: "search",
+            name: "search",
+            children: [
+              {
+                path: ":name",
+                name: ":name",
+                element: <FindUser />,
+              },
+            ],
+          },
+          {
+            path: "message",
+            name: "message",
+            element: <Message socket={props.socket} />,
+            children: [
+              {
+                path: ":id",
+                name: ":id",
+                element: <MessageContainer />,
+              },
+            ],
           },
         ]
       ) : (

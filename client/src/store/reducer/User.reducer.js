@@ -1,6 +1,7 @@
 import { USER } from "../type/User.type";
 const initialState = {
-  data: [],
+  userData: [],
+  users: [],
   loading: false,
 };
 
@@ -9,9 +10,15 @@ export default function User(state = initialState, action) {
     case USER.USER_REQUEST:
       return { ...state, loading: true };
     case USER.USER_SUCCESS:
-      return { data: action.payload.userInfo, loading: false };
+      return { ...state, userData: action.payload.userInfo, loading: false };
     case USER.USER_FAIL:
       return { ...state, loading: false };
+    case USER.FINDNAMEUSER_REQUEST:
+      return { ...state, loading: true };
+    case USER.FINDNAMEUSER_SUCCESS:
+      return { ...state, users: action.payload, loading: false };
+    case USER.FINDNAMEUSER_FAIL:
+      return { ...state };
     default:
       return state;
   }
